@@ -1,10 +1,12 @@
 "use client";
 import { useRouter } from "next/navigation"; // Use next/navigation for Server Components
+import React from "react"; // Add import for React
 
 export default function Page() {
   const router = useRouter();
 
-  const handleSignIn = async (event) => {
+  const handleSignIn = async (event: React.MouseEvent) => {
+    // Add type annotation
     // ... your authentication logic ...
 
     if (true) {
