@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "bootstrap-icons/font/bootstrap-icons.css";
+
+body {
+  /*padding-top: 1rem;*/
+}
+
+.side-bar {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(105, 75, 189, 0.41) 95.27%
+  );
+}
+
+.logo-color {
+  background: var(
+    --Blended,
+    linear-gradient(90deg, #9b6ad3 0%, #694bbd 95.27%)
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

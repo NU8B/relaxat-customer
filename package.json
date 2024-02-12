@@ -1,0 +1,41 @@
+{
+  "name": "relaxat",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "format": "prettier --tab-width 4 --write ."
+  },
+  "dependencies": {
+    "@fullcalendar/core": "^6",
+    "@fullcalendar/daygrid": "^6",
+    "@fullcalendar/interaction": "^6",
+    "@fullcalendar/react": "^6",
+    "@fullcalendar/timegrid": "^6",
+    "@headlessui/react": "^1.7.18",
+    "bootstrap": "^5.3.2",
+    "bootstrap-icons": "^1.11.3",
+    "next": "14",
+    "react": "^18.2.0",
+    "react-datepicker": "^6",
+    "react-dom": "^18",
+    "react-google-charts": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18.2.55",
+    "@types/react-datepicker": "^4.19.5",
+    "@types/react-dom": "^18",
+    "@types/react-router-dom": "^5.3.3",
+    "autoprefixer": "^10.0.1",
+    "eslint": "^8",
+    "eslint-config-next": "14.1.0",
+    "postcss": "^8",
+    "prettier": "^3.2.4",
+    "tailwindcss": "^3.3.0",
+    "typescript": "^5"
+  }
+}
