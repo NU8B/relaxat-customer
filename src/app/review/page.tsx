@@ -2,9 +2,13 @@
 import React, { useState } from "react";
 import NavBar from "../ui/home/nav-bar";
 import SideBar from "../ui/home/side-bar";
-// ... (existing imports)
 
-const StarRating = ({ value, onClick }) => {
+interface StarRatingProps {
+  value: number;
+  onClick: (value: number) => void;
+}
+
+const StarRating: React.FC<StarRatingProps> = ({ value, onClick }) => {
   const stars = [1, 2, 3, 4, 5];
 
   return (
