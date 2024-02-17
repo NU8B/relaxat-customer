@@ -6,7 +6,7 @@ export default function Page() {
       <div className="flex-none">
         {/* Add your image here */}
         <img
-          src="/image1.png" // Replace with your image path
+          src="/image2.png" // Replace with your image path
           alt="Image"
           className="h-full max-w-none"
         />
