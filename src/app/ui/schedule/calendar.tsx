@@ -18,6 +18,15 @@ export default function Calendar() {
     }
   };
 
+  const handleCancelClick = (event: any) => {
+    if (
+      confirm(`Are you sure you want to cancel the booking '${event.title}'`)
+    ) {
+      // Handle cancellation logic here
+      console.log(`Cancelled booking: ${event.title}`);
+    }
+  };
+
   function renderEventContent(eventInfo: any) {
     const formatTimeStart = eventInfo.event.start.toLocaleString("en-US", {
       timeZone: "Asia/Bangkok",
@@ -33,19 +42,37 @@ export default function Calendar() {
 
     return (
       <>
-        <i>
-          {formatTimeStart} - {formatTimeEnd}
-        </i>
-        <br />
-        <b>{eventInfo.event.title}</b>
-        <br />
-        {eventInfo.event.extendedProps.description.map(
-          (each: string, index: number) => (
-            <div key={index}>
-              <i key={index}>* {each}</i>
-            </div>
-          )
-        )}
+        <div style={{ position: "relative", textAlign: "left" }}>
+          <i>
+            {formatTimeStart} - {formatTimeEnd}
+          </i>
+          <br />
+          <b>{eventInfo.event.title}</b>
+          <br />
+          {eventInfo.event.extendedProps.description.map(
+            (each: string, index: number) => (
+              <div key={index}>
+                <i key={index}>* {each}</i>
+              </div>
+            )
+          )}
+          <button
+            style={{
+              position: "absolute",
+              bottom: "5px",
+              right: "5px",
+              color: "white",
+              background: "#8b0000", // Darker red color
+              padding: "5px 10px",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+            onClick={() => handleCancelClick(eventInfo.event)}
+          >
+            Cancel
+          </button>
+        </div>
       </>
     );
   }
