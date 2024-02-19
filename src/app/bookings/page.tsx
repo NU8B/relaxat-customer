@@ -9,20 +9,25 @@ interface BookingProps {
   date: string;
   time: string;
   staff: string;
+  isUpcoming: Boolean;
 }
 
-// Component for displaying a booking
+// ... (previous imports and interfaces)
+
 const Booking: React.FC<BookingProps> = ({
   service,
   branch,
   date,
   time,
   staff,
+  isUpcoming,
 }) => (
   <div className="border p-4 my-4 relative">
-    <button className="bg-red-700 text-white px-4 py-2 rounded absolute top-2 right-2">
-      Cancel Booking
-    </button>
+    {isUpcoming && (
+      <button className="bg-red-700 text-white px-4 py-2 rounded absolute top-2 right-2">
+        Cancel Booking
+      </button>
+    )}
     <p>
       <strong>Service:</strong> {service}
     </p>
@@ -47,13 +52,14 @@ const Page: React.FC = () => {
   const employees = ["John", "Emily"];
   const availableTimeSlots = ["10:00 AM", "11:00 AM", "2:00 PM", "3:00 PM"];
 
-  const upcomingBookings: BookingProps[] = [
+  const upcomingBookings: (BookingProps & { isUpcoming: boolean })[] = [
     {
       service: "Hair Styling",
       branch: "Bangkok",
       date: "8th February, 2024",
       time: "16:00",
       staff: "Mr. John Doe",
+      isUpcoming: true,
     },
     {
       service: "Nail care",
@@ -61,6 +67,7 @@ const Page: React.FC = () => {
       date: "12th February, 2024",
       time: "14:30",
       staff: "Ms. Jane Smith",
+      isUpcoming: true,
     },
   ];
 
@@ -71,6 +78,7 @@ const Page: React.FC = () => {
       date: "5th February, 2024",
       time: "14:30",
       staff: "Ms. Emily Smith",
+      isUpcoming: false,
     },
     {
       service: "Hair Styling",
@@ -78,6 +86,7 @@ const Page: React.FC = () => {
       date: "3rd February, 2024",
       time: "11:00",
       staff: "Mr. Robert Johnson",
+      isUpcoming: false,
     },
   ];
 
@@ -100,7 +109,7 @@ const Page: React.FC = () => {
               <h1 className="text-3xl font-bold my-4">Past Bookings</h1>
             )}
             {pastBookings.map((booking, index) => (
-              <Booking key={index} {...booking} />
+              <Booking key={index} {...booking} isUpcoming={false} />
             ))}
           </section>
           <div className="text-center mt-8">
