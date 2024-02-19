@@ -42,17 +42,22 @@ const Booking: React.FC<BookingProps> = ({
 );
 
 const Page: React.FC = () => {
+  const branches = ["Bangkok", "Phuket", "Chiangmai"];
+  const services = ["Hair Styling", "Nail care", "Massage"];
+  const employees = ["John", "Emily"];
+  const availableTimeSlots = ["10:00 AM", "11:00 AM", "2:00 PM", "3:00 PM"];
+
   const upcomingBookings: BookingProps[] = [
     {
-      service: "Hair Dry & Style",
-      branch: "Siam Paragon",
+      service: "Hair Styling",
+      branch: "Bangkok",
       date: "8th February, 2024",
       time: "16:00",
       staff: "Mr. John Doe",
     },
     {
       service: "Nail care",
-      branch: "Central Plaza",
+      branch: "Phuket",
       date: "12th February, 2024",
       time: "14:30",
       staff: "Ms. Jane Smith",
@@ -62,14 +67,14 @@ const Page: React.FC = () => {
   const pastBookings: BookingProps[] = [
     {
       service: "Massage",
-      branch: "Central Plaza",
+      branch: "Chiangmai",
       date: "5th February, 2024",
       time: "14:30",
       staff: "Ms. Emily Smith",
     },
     {
       service: "Hair Styling",
-      branch: "Siam Paragon",
+      branch: "Bangkok",
       date: "3rd February, 2024",
       time: "11:00",
       staff: "Mr. Robert Johnson",
