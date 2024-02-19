@@ -12,8 +12,6 @@ interface BookingProps {
   isUpcoming: Boolean;
 }
 
-// ... (previous imports and interfaces)
-
 const Booking: React.FC<BookingProps> = ({
   service,
   branch,
@@ -47,11 +45,6 @@ const Booking: React.FC<BookingProps> = ({
 );
 
 const Page: React.FC = () => {
-  const branches = ["Bangkok", "Phuket", "Chiangmai"];
-  const services = ["Hair Styling", "Nail care", "Massage"];
-  const employees = ["John", "Emily"];
-  const availableTimeSlots = ["10:00 AM", "11:00 AM", "2:00 PM", "3:00 PM"];
-
   const upcomingBookings: (BookingProps & { isUpcoming: boolean })[] = [
     {
       service: "Hair Styling",
