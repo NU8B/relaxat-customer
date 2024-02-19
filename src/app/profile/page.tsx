@@ -34,7 +34,6 @@ const Page: React.FC = () => {
         <div className="flex flex-col flex-1 p-8">
           <div className="mt-8">
             <ProfileCard title="Name" value="Adam Smasher" />
-            <ProfileCard title="Phone number" value="OXX-XXX-XXXX" />
             <ProfileCard title="Email" value="Adam_Smasher@email.com" />
             <ProfileCard title="Password" value="**********" />
           </div>
