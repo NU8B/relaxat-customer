@@ -28,7 +28,7 @@ export default function SideBar() {
             stroke-linejoin="round"
         />
     </svg>`,
-      text: "Book",
+      text: "Bookings",
     },
     {
       svg: `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 48 48" fill="none">
