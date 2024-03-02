@@ -34,16 +34,14 @@ app.post("/signup", async (req, res) => {
   console.log("Received signup request:", req.body);
   try {
     const { firstname, lastname, email, password } = req.body;
-    // Perform validation
-    const isNameValid = validateName(name);
+
     const isEmailValid = validateEmail(email);
     const isPasswordValid = validatePassword(password);
 
-    if (!isNameValid || !isEmailValid || !isPasswordValid) {
+    if (!isEmailValid || !isPasswordValid) {
       return res.status(400).json({
         success: false,
         errors: {
-          name: isNameValid ? "" : "Please enter your first and last name",
           email: isEmailValid ? "" : "Please enter a valid email address",
           password: isPasswordValid
             ? ""
@@ -69,11 +67,6 @@ app.post("/signup", async (req, res) => {
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 });
-
-// Validation Helper Functions (Place these somewhere accessible by server.js)
-function validateName(name) {
-  return name.trim().split(" ").length >= 2;
-}
 
 function validateEmail(email) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
