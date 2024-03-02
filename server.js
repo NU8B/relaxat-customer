@@ -1,10 +1,10 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const { Pool } = require("pg");
-
+const cors = require("cors");
 const app = express();
 const port = 3001; // Choose a port for your backend server
-
+app.use(cors());
 // Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
