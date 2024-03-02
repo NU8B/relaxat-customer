@@ -1,10 +1,9 @@
 "use client";
 import React, { useState, FormEvent, ChangeEvent } from "react";
-import { useHistory } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function SignupPage() {
-  const history = useHistory();
-
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     console.log("Form submitted!");
@@ -13,7 +12,7 @@ export default function SignupPage() {
 
     if (isEmailValid && isPasswordValid) {
       try {
-        const response = await fetch("/signup", {
+        const response = await fetch("http://localhost:3001/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -27,15 +26,36 @@ export default function SignupPage() {
         if (response.ok) {
           const data = await response.json();
           console.log("Signup successful:", data);
-          // If needing to access user data:
-          // console.log(data.user);
-          history.push("/signin");
+
+          // Show success notification
+          toast.success("Successful! Redirecting to Sign In...", {
+            position: "top-center",
+            autoClose: 2000,
+          });
+
+          // Redirect to Sign In after a delay
+          setTimeout(() => {
+            console.log("Redirection initiated to /signin");
+            window.location.href = "/signin";
+          }, 2000);
         } else {
-          const data = await response.json();
-          setErrors(data.errors);
+          const errorData = await response.json();
+          console.error("Signup error:", errorData);
+
+          // Handle specific error cases
+          if (response.status === 500) {
+            toast.error(
+              "This email is already registered. Please use a different email.",
+              {
+                position: "top-center",
+                autoClose: 4000,
+              }
+            );
+          }
         }
       } catch (error) {
         // ... handle network or other errors
+        console.error("Network error:", error);
       }
     }
   };
@@ -189,7 +209,7 @@ export default function SignupPage() {
                   onChange={handleChange}
                 />
                 {/* Show error message */}
-                {errors.email && (
+                {errors && errors.email && (
                   <p className="text-red-500 text-sm">{errors.email}</p>
                 )}
               </div>
@@ -242,6 +262,7 @@ export default function SignupPage() {
           </p>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 }

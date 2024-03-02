@@ -1,11 +1,13 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const { Pool } = require("pg");
-const cors = require("cors");
 const app = express();
 const port = 3001; // Choose a port for your backend server
-app.use(cors());
+const cors = require("cors");
+
 // Middleware
+app.use(cors());
+app.options("*", cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -18,21 +20,15 @@ const pool = new Pool({
   port: 5432,
 });
 
-async function fetchAndDisplayAccounts() {
-  try {
-    const result = await pool.query("SELECT * FROM accounts");
-    console.log(result.rows);
-  } catch (err) {
-    console.error("Error fetching accounts:", err);
-  } finally {
-    pool.end(); // Close the pool connection
-  }
-}
+app.get("/", (req, res) => {
+  res.send("Welcome to the Relaxat server!");
+});
 
 // Route to handle user signup
 app.post("/signup", async (req, res) => {
-  console.log("Received signup request:", req.body);
   try {
+    console.log("Received signup request:", req.body);
+
     const { firstname, lastname, email, password } = req.body;
 
     const isEmailValid = validateEmail(email);
@@ -50,17 +46,12 @@ app.post("/signup", async (req, res) => {
       });
     }
 
-    const bcrypt = require("bcrypt");
-
-    // ... inside your /signup route
-    const saltRounds = 10; // Adjust for desired security level
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
     const result = await pool.query(
       "INSERT INTO accounts (first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING *",
-      [firstname, lastname, email, hashedPassword]
+      [firstname, lastname, email, password]
     );
 
+    console.log("Signup successful:", result.rows[0]);
     res.json({ success: true, user: result.rows[0] });
   } catch (error) {
     console.error("Error during signup:", error);
@@ -80,5 +71,4 @@ function validatePassword(password) {
 // Start server and display accounts
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
-  fetchAndDisplayAccounts(); // Display on startup
 });
