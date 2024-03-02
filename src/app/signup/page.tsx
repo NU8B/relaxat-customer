@@ -7,17 +7,10 @@ export default function SignupPage() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const isFirstNameValid = validateFirstName();
-    const isLastNameValid = validateLastName();
     const isEmailValid = validateEmail();
     const isPasswordValid = validatePassword();
 
-    if (
-      isFirstNameValid &&
-      isLastNameValid &&
-      isEmailValid &&
-      isPasswordValid
-    ) {
+    if (isEmailValid && isPasswordValid) {
       try {
         const response = await fetch(
           "https://relaxat-customer.vercel.app/signup",
@@ -56,8 +49,6 @@ export default function SignupPage() {
     password: "",
   });
   const [errors, setErrors] = useState({
-    firstname: "",
-    lastname: "",
     email: "",
     password: "",
   });
@@ -86,40 +77,6 @@ export default function SignupPage() {
         ...formData,
         email: inputValue,
       });
-    }
-  };
-
-  const validateFirstName = () => {
-    if (formData.firstname.trim().length < 2) {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        firstname: "First Name must be at least 2 characters",
-      }));
-      return false;
-    } else {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        firstname: "",
-      }));
-      return true;
-    }
-  };
-
-  const validateLastName = () => {
-    console.log("formData.lastname:", formData.lastname);
-
-    if (formData.lastname.trim().length < 2) {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        lastname: "Last Name must be at least 2 characters long",
-      }));
-      return false;
-    } else {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        lastname: "",
-      }));
-      return true;
     }
   };
 
@@ -193,10 +150,6 @@ export default function SignupPage() {
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   onChange={handleChange}
                 />
-                {/* Name Error */}
-                {errors.firstname && (
-                  <p className="text-red-500 text-sm">{errors.firstname}</p>
-                )}
               </div>
             </div>
 
@@ -217,10 +170,6 @@ export default function SignupPage() {
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   onChange={handleChange}
                 />
-                {/* Name Error */}
-                {errors.lastname && (
-                  <p className="text-red-500 text-sm">{errors.lastname}</p>
-                )}
               </div>
             </div>
 
