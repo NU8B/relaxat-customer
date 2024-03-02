@@ -33,8 +33,7 @@ async function fetchAndDisplayAccounts() {
 app.post("/signup", async (req, res) => {
   console.log("Received signup request:", req.body);
   try {
-    const { name, email, password } = req.body; // Updated!
-
+    const { firstname, lastname, email, password } = req.body;
     // Perform validation
     const isNameValid = validateName(name);
     const isEmailValid = validateEmail(email);
@@ -61,7 +60,7 @@ app.post("/signup", async (req, res) => {
 
     const result = await pool.query(
       "INSERT INTO accounts (first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING *",
-      [firstName, lastName, email, hashedPassword] // Updated
+      [firstname, lastname, email, hashedPassword]
     );
 
     res.json({ success: true, user: result.rows[0] });
