@@ -30,14 +30,14 @@ export default function SignupPage() {
           // Show success notification
           toast.success("Successful! Redirecting to Sign In...", {
             position: "top-center",
-            autoClose: 2000,
+            autoClose: 1000,
           });
 
           // Redirect to Sign In after a delay
           setTimeout(() => {
             console.log("Redirection initiated to /signin");
             window.location.href = "/signin";
-          }, 2000);
+          }, 1000);
         } else {
           const errorData = await response.json();
           console.error("Signup error:", errorData);

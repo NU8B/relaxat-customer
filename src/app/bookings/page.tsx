@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
-import NavBar from "../ui/home/nav-bar";
-import SideBar from "../ui/home/side-bar";
+import NavBar from "../ui/nav-bar";
+import SideBar from "../ui/side-bar";
 
 interface BookingProps {
   service: string;

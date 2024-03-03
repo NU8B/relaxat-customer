@@ -1,6 +1,6 @@
-import NavBar from "../ui/home/nav-bar";
-import SideBar from "../ui/home/side-bar";
-import Calendar from "../ui/schedule/calendar";
+import NavBar from "../ui/nav-bar";
+import SideBar from "../ui/side-bar";
+import Calendar from "./calendar";
 
 export default function Page() {
   return (

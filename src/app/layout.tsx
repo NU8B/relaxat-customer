@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 
-import NavBar from "./ui/home/nav-bar";
+import NavBar from "./ui/nav-bar";
 
 const poppins = Poppins({ weight: "400", subsets: ["latin"] });
 

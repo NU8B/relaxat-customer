@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import UserBox from "./user-box";
 
 export default function NavBar() {
   return (
@@ -9,7 +8,6 @@ export default function NavBar() {
       <Link className="uppercase logo-color font-bold text-3xl" href="/">
         Relaxat
       </Link>
-      <UserBox />
     </nav>
   );
 }

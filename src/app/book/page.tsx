@@ -1,6 +1,6 @@
 import React from "react";
-import NavBar from "../ui/home/nav-bar";
-import SideBar from "../ui/home/side-bar";
+import NavBar from "../ui/nav-bar";
+import SideBar from "../ui/side-bar";
 import BookingForm from "../components/BookingForm"; // Make sure to import the correct path to your BookingForm component
 
 export default function Page() {
