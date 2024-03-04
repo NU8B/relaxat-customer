@@ -1,4 +1,6 @@
 "use client";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import React, { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -28,11 +30,11 @@ const BookingForm = () => {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
   const [selectedService, setSelectedService] = useState<string | null>(null);
-  const [selectedEmployee, setSelectedEmployee] = useState<any | null>(null);
-
+  const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null);
+  const [staffId, setStaffId] = useState<number | null>(null);
   const [availableBranches, setAvailableBranches] = useState<any[]>([]);
   const [availableServices, setAvailableServices] = useState<any[]>([]);
-  const [availableEmployees, setAvailableEmployees] = useState<any[]>([]);
+  const [availableEmployees, setAvailableEmployees] = useState<string[]>([]);
   const [availableTimeSlots, setAvailableTimeSlots] = useState<number[]>([]);
 
   // Fetch branches
@@ -148,24 +150,35 @@ const BookingForm = () => {
   // Fetch time slots (based on employee and date)
   useEffect(() => {
     if (selectedEmployee && selectedDate) {
-      const staffId = selectedEmployee.person_id;
-      const appointmentDate = selectedDate.toISOString().split("T")[0];
-
-      fetch(
-        `http://52.139.168.229:3000/api/v1/staff/available?staffId=${staffId}&appointmentDate=${appointmentDate}`
-      )
+      fetch(`http://52.139.168.229:3000/api/v1/staff`)
         .then((response) => response.json())
         .then((data) => {
-          if (data && data.data && data.data.freeHour) {
-            setAvailableTimeSlots(data.data.freeHour);
-          } else {
-            console.error("No available time slots found");
-            setAvailableTimeSlots([]);
+          const selectedEmployeeData = data.data.find(
+            (employee: Employee) => employee.first_name === selectedEmployee
+          );
+
+          if (selectedEmployeeData) {
+            const staffId = selectedEmployeeData.person_id;
+            const appointmentDate = selectedDate.toISOString().split("T")[0];
+            console.log(staffId, appointmentDate);
+            fetch(
+              `http://52.139.168.229:3000/api/v1/staff/available?staffId=${staffId}&appointmentDate=${appointmentDate}`
+            )
+              .then((response) => response.json())
+              .then((data) => {
+                if (data && data.data && data.data.freeHour) {
+                  setAvailableTimeSlots(data.data.freeHour);
+                } else {
+                  console.error("No available time slots found");
+                  setAvailableTimeSlots([]);
+                }
+              })
+              .catch((error) =>
+                console.error("Error fetching available time slots:", error)
+              );
           }
         })
-        .catch((error) =>
-          console.error("Error fetching available time slots:", error)
-        );
+        .catch((error) => console.error("Error fetching staff data:", error));
     }
   }, [selectedEmployee, selectedDate]);
 
@@ -193,17 +206,96 @@ const BookingForm = () => {
     setSelectedTimeSlot(null);
   };
 
-  const handleEmployeeSelect = (employee: string) => {
+  const handleEmployeeSelect = async (employee: string) => {
     setSelectedEmployee(employee);
-    // Reset time slot selection when the employee changes
-    setSelectedTimeSlot(null);
+    setSelectedTimeSlot(null); // Reset time slot selection when the employee changes
+
+    // Fetch staffId based on selected employee
+    try {
+      const staffId = await fetchStaffId(selectedEmployee);
+      if (staffId !== null) {
+        setStaffId(staffId); // Assuming you have state to store staffId
+
+        // Fetch available time slots based on staffId and selected date
+        const appointmentDate = selectedDate?.toISOString().split("T")[0];
+        if (appointmentDate) {
+          fetchAvailableTimeSlots(staffId, appointmentDate);
+        }
+      } else {
+        console.error("StaffId is null");
+      }
+    } catch (error) {
+      console.error("Error fetching staffId:", error);
+    }
+  };
+
+  const fetchStaffId = async (
+    selectedEmployee: string | null
+  ): Promise<number | null> => {
+    try {
+      if (selectedEmployee === null) {
+        // Handle the case where selectedEmployee is null
+        return null;
+      }
+
+      const response = await fetch(
+        `http://52.139.168.229:3000/api/v1/staff?employee_firstName=${selectedEmployee}`
+      );
+
+      if (!response.ok) {
+        console.error(
+          `Error fetching staffId for ${selectedEmployee}: ${response.status}`
+        );
+        return null;
+      }
+
+      const data: Employee | null = await response.json();
+
+      // Assuming the API returns a single staff object with matching first name
+      return data ? data.person_id : null;
+    } catch (error) {
+      console.error(`Error fetching staffId for ${selectedEmployee}:`, error);
+      return null;
+    }
+  };
+
+  const fetchAvailableTimeSlots = async (
+    staffId: number,
+    appointmentDate: string
+  ) => {
+    try {
+      const response = await fetch(
+        `http://52.139.168.229:3000/api/v1/staff/available?staffId=${staffId}&appointmentDate=${appointmentDate}`
+      );
+
+      if (!response.ok) {
+        console.error(
+          `Error fetching available time slots for staffId ${staffId} and date ${appointmentDate}: ${response.status}`
+        );
+        setAvailableTimeSlots([]);
+        return;
+      }
+
+      const data = await response.json();
+      if (data && data.data && data.data.freeHour) {
+        setAvailableTimeSlots(data.data.freeHour);
+      } else {
+        console.error("No available time slots found");
+        setAvailableTimeSlots([]);
+      }
+    } catch (error) {
+      console.error("Error fetching available time slots:", error);
+      setAvailableTimeSlots([]);
+    }
   };
 
   const handleTimeSlotClick = (timeSlot: string) => {
     setSelectedTimeSlot(timeSlot);
   };
 
-  const handleSubmitBooking = () => {
+  const handleSubmitBooking = async () => {
+    console.log("Submit button clicked");
+
     // Validate and submit the booking to the API
     if (
       selectedBranch &&
@@ -212,37 +304,81 @@ const BookingForm = () => {
       selectedTimeSlot &&
       selectedDate
     ) {
-      const bookingData = {
-        serviceId:
-          selectedService && typeof selectedService === "object"
-            ? (selectedService as { id: string }).id
-            : null,
-        customerId: 33, // Replace with the actual customer ID
-        appointmentDate: selectedDate
-          ? selectedDate.toISOString().split("T")[0]
-          : null,
-        appointmentTime: selectedTimeSlot,
-        staffId:
-          selectedEmployee && typeof selectedEmployee === "object"
-            ? (selectedEmployee as { person_id: string }).person_id
-            : null,
-      };
+      console.log("Booking data:", {
+        selectedBranch,
+        selectedService,
+        selectedEmployee,
+        selectedTimeSlot,
+        selectedDate,
+      });
 
-      // POST request to submit the booking
-      fetch("http://52.139.168.229:3000/api/v1/appointments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(bookingData),
-      })
-        .then((response) => response.json())
-        .then((data) => {
+      const selectedServiceData = availableServices.find(
+        (service) => service.service_name === selectedService
+      );
+
+      if (!selectedServiceData) {
+        console.error("Selected service data not found");
+        return;
+      }
+
+      try {
+        // Fetch staffId asynchronously
+        const staffId = await fetchStaffId(selectedEmployee);
+
+        if (staffId === null) {
+          console.error("StaffId is null");
+          return;
+        }
+
+        const bookingData = {
+          serviceId: selectedServiceData.id,
+          customerId: 33, // Replace with the actual customer ID
+          appointmentDate: selectedDate
+            ? selectedDate.toISOString().split("T")[0]
+            : null,
+          appointmentTime: `${selectedTimeSlot}:00`,
+          staffId: staffId, // Use the fetched staffId
+        };
+
+        console.log("Booking data to be submitted:", bookingData);
+
+        const response = await fetch(
+          "http://52.139.168.229:3000/api/v1/appointments",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(bookingData),
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+
           console.log("Booking submitted successfully:", data);
+
+          toast.success("Booking Successful! Redirecting...", {
+            position: "top-center",
+            autoClose: 1000,
+          });
+
           // Redirect to "/bookings" or handle the success case accordingly
           window.location.href = "/bookings";
-        })
-        .catch((error) => console.error("Error submitting booking:", error));
+        } else {
+          console.error("Error submitting booking:", response.status);
+          toast.error("Error submitting booking. Please try again.", {
+            position: "top-center",
+            autoClose: 3000,
+          });
+        }
+      } catch (error) {
+        console.error("Error during booking submission:", error);
+        toast.error("Error during booking submission. Please try again.", {
+          position: "top-center",
+          autoClose: 3000,
+        });
+      }
     }
   };
 
@@ -267,19 +403,58 @@ const BookingForm = () => {
           <option
             key={option.id} // Add a unique key prop here
             value={
-              option.branch_name ||
-              option.service_name ||
-              `${option.first_name} ${option.last_name}`
+              option.branch_name || option.service_name || availableEmployees
             }
           >
-            {option.branch_name ||
-              option.service_name ||
-              `${option.first_name} ${option.last_name}`}
+            {option.branch_name || option.service_name || availableEmployees}
           </option>
         ))}
       </select>
     </div>
   );
+
+  const renderTimeSlotDropdown = (
+    heading: string,
+    options: string[],
+    selectedOption: string | null,
+    onSelect: (optionName: string) => void
+  ) => (
+    <div style={{ marginBottom: "20px" }}>
+      <h2>{heading}:</h2>
+      <select
+        className="bg-gray-200 text-gray-700 focus:ring-4 focus:ring-indigo-300 font-medium rounded-lg text-lg px-3 py-2 me-2"
+        onChange={(e) => onSelect(e.target.value)}
+        value={selectedOption ? selectedOption : ""}
+      >
+        <option value="" disabled>
+          Select an option
+        </option>
+        {options.map((option: string) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+
+  function generateTimeSlots(availableTimeSlots: number[]): string[] {
+    const timeSlots = [];
+
+    for (const hour of availableTimeSlots) {
+      if (hour >= 0 && hour <= 23) {
+        // Basic check for valid hour
+        timeSlots.push(`${hour}:00`);
+      } else {
+        // Handle invalid hour if needed
+        console.error("Invalid hour encountered:", hour);
+      }
+    }
+
+    return timeSlots;
+  }
+
+  const timeSlots = generateTimeSlots(availableTimeSlots);
 
   return (
     <div>
@@ -314,11 +489,11 @@ const BookingForm = () => {
             selectedEmployee,
             (employeeName) => handleEmployeeSelect(employeeName)
           )}
-          {renderDropdown(
+          {renderTimeSlotDropdown(
             "Time Slot",
-            availableTimeSlots.map((hour) => ({ id: hour, freeHour: hour })),
+            timeSlots,
             selectedTimeSlot,
-            handleTimeSlotClick
+            (timeSlot) => handleTimeSlotClick(timeSlot)
           )}
         </>
       )}
@@ -336,6 +511,8 @@ const BookingForm = () => {
       >
         Confirm Booking
       </button>
+
+      <ToastContainer />
     </div>
   );
 };
