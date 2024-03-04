@@ -12,16 +12,19 @@ export default function SignupPage() {
 
     if (isEmailValid && isPasswordValid) {
       try {
-        const response = await fetch("http://localhost:3001/signup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            firstname: formData.firstname,
-            lastname: formData.lastname,
-            email: formData.email,
-            password: formData.password,
-          }),
-        });
+        const response = await fetch(
+          "http://52.139.168.229:3000/api/v1/signup",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              firstName: formData.firstName,
+              lastName: formData.lastName,
+              email: formData.email,
+              password: formData.password,
+            }),
+          }
+        );
 
         if (response.ok) {
           const data = await response.json();
@@ -61,8 +64,8 @@ export default function SignupPage() {
   };
 
   const [formData, setFormData] = useState({
-    firstname: "", // Add firstname
-    lastname: "", // Add lastname
+    firstName: "", // Add firstName
+    lastName: "", // Add lastName
     email: "",
     password: "",
   });
@@ -75,15 +78,15 @@ export default function SignupPage() {
     const inputName = event.target.name;
     const inputValue = event.target.value;
 
-    if (inputName === "firstname") {
+    if (inputName === "firstName") {
       setFormData({
         ...formData,
-        firstname: inputValue,
+        firstName: inputValue,
       });
-    } else if (inputName === "lastname") {
+    } else if (inputName === "lastName") {
       setFormData({
         ...formData,
-        lastname: inputValue,
+        lastName: inputValue,
       });
     } else if (inputName === "password") {
       setFormData({
@@ -153,17 +156,17 @@ export default function SignupPage() {
           >
             <div>
               <label
-                htmlFor="firstname"
+                htmlFor="firstName"
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
                 First Name
               </label>
               <div className="mt-2">
                 <input
-                  id="firstname"
-                  name="firstname"
+                  id="firstName"
+                  name="firstName"
                   type="text"
-                  autoComplete="current-firstname"
+                  autoComplete="current-firstName"
                   required
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   onChange={handleChange}
@@ -173,17 +176,17 @@ export default function SignupPage() {
 
             <div>
               <label
-                htmlFor="lastname"
+                htmlFor="lastName"
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
                 Last Name
               </label>
               <div className="mt-2">
                 <input
-                  id="lastname"
-                  name="lastname"
+                  id="lastName"
+                  name="lastName"
                   type="text"
-                  autoComplete="current-lastname"
+                  autoComplete="current-lastName"
                   required
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   onChange={handleChange}

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import NavBar from "../ui/nav-bar";
 import SideBar from "../ui/side-bar";
 
@@ -19,68 +19,57 @@ const EditableProfileCard: React.FC<EditableProfileCardProps> = ({
   onEdit,
   onSave,
 }: EditableProfileCardProps) => {
+  const [isEditing, setIsEditing] = useState(false);
   const [editedValue, setEditedValue] = useState(value);
   const [error, setError] = useState<string | null>(null);
 
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  const validatePassword = (password: string): boolean => {
-    return password.length >= 8;
-  };
+  useEffect(() => {
+    if (isEditing) {
+      setEditedValue(value); // Reset input when entering edit mode
+    }
+  }, [isEditing, value]);
 
   const handleSave = () => {
-    if (title === "Email" && !validateEmail(editedValue)) {
-      setError("Please enter a valid email address");
-      return;
-    }
-
-    if (title === "Password" && !validatePassword(editedValue)) {
-      setError("Password must be at least 8 characters long");
-      return;
-    }
-
     setError(null);
     onSave(editedValue);
-    onEdit();
+    setIsEditing(false); // Exit edit mode after save
   };
 
   return (
     <div className="bg-gray-200 shadow-md rounded-lg p-6 mb-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-bold">{title}</h2>
-        <div className="flex items-center">
-          {title === "Password" ? (
-            <>
-              <input
-                type="password"
-                value={editedValue}
-                onChange={(e) => setEditedValue(e.target.value)}
-                className="border border-gray-300 p-1 mr-2"
-              />
-            </>
-          ) : (
-            <>
-              <input
-                type={title === "Email" ? "email" : "text"}
-                value={editedValue}
-                onChange={(e) => setEditedValue(e.target.value)}
-                className="border border-gray-300 p-1 mr-2"
-              />
-            </>
-          )}
-          <button
-            className="text-gray-500 hover:text-gray-700 focus:outline-none"
-            onClick={handleSave}
-          >
-            Save
-          </button>
-        </div>
+        {title !== "Email" && (
+          <div className="flex items-center">
+            {isEditing ? (
+              <>
+                <input
+                  type={title === "Password" ? "password" : "text"}
+                  value={editedValue}
+                  onChange={(e) => setEditedValue(e.target.value)}
+                  placeholder="Enter new name"
+                  className="border border-gray-300 p-1 mr-2"
+                />
+                <button
+                  className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                  onClick={handleSave}
+                >
+                  Save
+                </button>
+              </>
+            ) : (
+              <button
+                className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                onClick={() => setIsEditing(true)}
+              >
+                Edit
+              </button>
+            )}
+          </div>
+        )}
       </div>
       {error && <p className="text-red-500">{error}</p>}
-      <div>{value}</div>
+      <div>{isEditing ? editedValue : value}</div>
     </div>
   );
 };
@@ -94,12 +83,14 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     <div className="bg-gray-200 shadow-md rounded-lg p-6 mb-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-bold">{title}</h2>
-        <button
-          className="text-gray-500 hover:text-gray-700 focus:outline-none"
-          onClick={onEdit}
-        >
-          Edit
-        </button>
+        {title !== "Email" && (
+          <button
+            className="text-gray-500 hover:text-gray-700 focus:outline-none"
+            onClick={onEdit}
+          >
+            Edit
+          </button>
+        )}
       </div>
       <div>{value}</div>
     </div>
@@ -108,37 +99,35 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
 
 const ProfilePage: React.FC = () => {
   const [userDetails, setUserDetails] = useState({
-    firstname: "",
-    lastname: "",
+    first_name: "",
+    last_name: "",
     email: "",
-    password: "",
-    // Add other user details as needed
   });
 
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      fetchUserDetails(token);
+    if (!editing) {
+      fetchUserDetails();
     }
-  }, []);
+  }, [editing]); // Fetch user details on component mount and when not in edit mode
 
-  const fetchUserDetails = async (token: string) => {
+  const fetchUserDetails = async () => {
     try {
-      const response = await fetch("http://localhost:3001/user-details", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        "http://52.139.168.229:3000/api/v1/customers/33",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
-        setUserDetails(data.user);
+        setUserDetails(data.data);
       } else {
         console.error("Error fetching user details:", response.statusText);
       }
@@ -150,24 +139,47 @@ const ProfilePage: React.FC = () => {
   };
 
   const handleSignOut = () => {
-    localStorage.removeItem("token");
     window.location.href = "/signin";
   };
 
-  const handleEdit = () => {
-    setEditing(!editing);
+  const handleEdit = (field: string) => {
+    setEditing(field);
   };
 
-  const handleSave = (field: string, newValue: string) => {
-    setUserDetails((prevDetails) => ({
-      ...prevDetails,
-      [field]: newValue,
-    }));
-    setEditing(false);
-  };
+  const handleSave = async (field: string, newValue: string) => {
+    try {
+      // Update the server with the new values
+      const response = await fetch(
+        "http://52.139.168.229:3000/api/v1/customers/33",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            firstName:
+              field === "first_name" ? newValue : userDetails.first_name,
+            lastName: field === "last_name" ? newValue : userDetails.last_name,
+          }),
+        }
+      );
 
-  const isSignedIn =
-    typeof window !== "undefined" && Boolean(localStorage.getItem("token"));
+      if (response.ok) {
+        // If the server update is successful, update the local state
+        setUserDetails((prevDetails) => ({
+          ...prevDetails,
+          first_name:
+            field === "first_name" ? newValue : prevDetails.first_name,
+          last_name: field === "last_name" ? newValue : prevDetails.last_name,
+        }));
+        setEditing(null); // Exit edit mode
+      } else {
+        console.error("Error updating user details:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error updating user details:", error);
+    }
+  };
 
   if (loading) {
     return <p>Loading...</p>;
@@ -179,81 +191,34 @@ const ProfilePage: React.FC = () => {
       <div className="flex gap-[6rem]">
         <SideBar />
         <div className="flex flex-col flex-1 p-8">
-          {isSignedIn ? (
-            <div className="mt-8">
-              {editing ? (
-                <>
-                  <EditableProfileCard
-                    title="First Name"
-                    value={userDetails?.firstname || ""}
-                    onEdit={handleEdit}
-                    onSave={(newValue) => handleSave("firstname", newValue)}
-                  />
-                  <EditableProfileCard
-                    title="Last Name"
-                    value={userDetails?.lastname || ""}
-                    onEdit={handleEdit}
-                    onSave={(newValue) => handleSave("lastname", newValue)}
-                  />
-                  <EditableProfileCard
-                    title="Email"
-                    value={userDetails?.email || ""}
-                    onEdit={handleEdit}
-                    onSave={(newValue) => handleSave("email", newValue)}
-                  />
-                  <EditableProfileCard
-                    title="Password"
-                    value={userDetails?.password || ""}
-                    onEdit={handleEdit}
-                    onSave={(newValue) => handleSave("password", newValue)}
-                  />
-                </>
-              ) : (
-                <>
-                  <ProfileCard
-                    title="First Name"
-                    value={userDetails?.firstname || ""}
-                    onEdit={handleEdit}
-                  />
-                  <ProfileCard
-                    title="Last Name"
-                    value={userDetails?.lastname || ""}
-                    onEdit={handleEdit}
-                  />
-                  <ProfileCard
-                    title="Email"
-                    value={userDetails?.email || ""}
-                    onEdit={handleEdit}
-                  />
-                  <ProfileCard
-                    title="Password"
-                    value="**********"
-                    onEdit={handleEdit}
-                  />
-                </>
-              )}
-              <div className="flex items-center justify-center mt-8">
-                <button
-                  className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5"
-                  onClick={handleSignOut}
-                >
-                  Sign Out
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center mt-8">
-              <p className="text-lg font-bold mb-4">Sign in to view</p>
+          <div className="mt-8">
+            <EditableProfileCard
+              title="First Name"
+              value={editing === "first_name" ? "" : userDetails.first_name}
+              onEdit={() => handleEdit("first_name")}
+              onSave={(newValue) => handleSave("first_name", newValue)}
+            />
+            <EditableProfileCard
+              title="Last Name"
+              value={editing === "last_name" ? "" : userDetails.last_name}
+              onEdit={() => handleEdit("last_name")}
+              onSave={(newValue) => handleSave("last_name", newValue)}
+            />
+
+            <ProfileCard
+              title="Email"
+              value={userDetails.email}
+              onEdit={() => {}}
+            />
+            <div className="flex items-center justify-center mt-8">
               <button
-                className="text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5"
-                onClick={() => {
-                  window.location.href = "/signin";
-                }}
+                className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5"
+                onClick={handleSignOut}
               >
-                Sign In
+                Sign Out
               </button>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </>

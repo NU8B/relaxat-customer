@@ -44,21 +44,17 @@ export default function SignInPage() {
     if (!validateForm()) return; // Validate the form before sending request
 
     try {
-      const response = await fetch("http://localhost:3001/signin", {
+      const response = await fetch("http://52.139.168.229:3000/api/v1/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          //Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify(formData),
       });
 
       if (response.ok) {
         const data = await response.json();
-        const { token } = data;
-
-        // Store the token in localStorage or a secure storage mechanism
-        localStorage.setItem("token", token);
 
         console.log("Login successful:", data);
 
